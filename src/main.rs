@@ -60,7 +60,8 @@ impl Compiler for LolcodeCompiler{
             break;
         }
         println!("Token: '{}'", tok);
-    }
+        }
+        //self.start()
     }
 
     fn next_token(&mut self) -> String {
