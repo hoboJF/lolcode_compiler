@@ -1,6 +1,246 @@
 use std::env;
 use std::fs;
 
+//--------------------compiler--------------------
+
+pub trait Compiler {
+/// Begin the compilation process (entry point).
+fn compile(&mut self, source: &str);
+/// Get the next token from the lexical analyzer.
+fn next_token(&mut self) -> String;
+/// Run the syntax analyzer starting from <lolcode>.
+fn parse(&mut self);
+/// Get the current token being processed.
+fn current_token(&self) -> String;
+/// Set the current token (typically used internally).
+fn set_current_token(&mut self, tok: String);
+}
+
+pub struct LolcodeCompiler{
+    lexer: LolcodeLexicalAnalyzer,
+    current_token: String,
+}
+
+impl LolcodeCompiler{
+
+    pub fn new() -> Self{
+        Self {
+            lexer: LolcodeLexicalAnalyzer::new(""),
+            current_token: String::new(),
+        }
+    }
+
+    fn start(&mut self){
+        let candidate = self.lexer.tokens.pop().unwrap_or_default();
+        if self.lexer.lookup(&candidate){
+            self.current_token = candidate;
+        } else if !candidate.is_empty(){
+            eprintln!("lexical error: '{}' is not a recognized token.", candidate);
+            std::process::exit(1);
+        } else {
+            eprintln!("user error: the provided code is empty");
+            std::process::exit(1);
+        }
+    }
+
+
+}
+
+impl Compiler for LolcodeCompiler{
+    fn compile(&mut self, source: &str){
+        self.lexer = LolcodeLexicalAnalyzer::new(source);
+        self.lexer.tokenize();
+        self.start();
+    }
+
+    fn next_token(&mut self) -> String{
+        let candidate = self.lexer.tokens.pop().unwrap_or_default();
+        if !candidate.starts_with('#'){
+            self.current_token = candidate.clone();
+            candidate
+        }
+        else if self.lexer.lookup(&candidate){
+            self.current_token = candidate.clone();
+            candidate
+        } else if self.lexer.tokens.is_empty() {
+            self.current_token.clear();
+            String::new()
+        }
+        else{
+            eprintln!("lexical error: '{}' is not a recognized token", candidate);
+            std::process::exit(1);
+        }
+    }
+
+    fn parse(&mut self){
+        
+    }
+
+    fn current_token(&self) -> String{
+        self.current_token.clone()
+    }
+
+    fn set_current_token(&mut self, token: String){
+        self.current_token = token;
+    }
+}
+
+//--------------------lexical analyzer--------------------
+
+pub trait LexicalAnalyzer {
+/// Return the next character from the input.
+/// If input is exhausted, should terminate the program.
+fn get_char(&mut self) -> char;
+/// Add a character to the current potential token.
+fn add_char(&mut self, c: char);
+/// Lookup a potential token to determine if it is valid.
+/// Returns true if a valid token/lexeme, false otherwise.
+fn lookup(&self, s: &str) -> bool;
+}
+
+pub struct LolcodeLexicalAnalyzer{
+    input: Vec<char>,
+    position: usize,
+    current_build: String,
+    pub tokens: Vec<String>,
+    //i changed all of the variable names to ..._... because i was getting very annoying warnings about them being named in the "somethingSomething" convention
+    pub lolcode_begin : String,
+    pub lolcode_end : String,
+    pub comment_begin : String,
+    pub comment_end : String,
+    pub head_begin : String,
+    pub end_one : String,
+    pub title_begin : String,
+    pub end_two : String,
+    pub paragraph_begin : String,
+    pub bold_begin : String,
+    pub italics_begin : String,
+    pub list_begin : String,
+    pub list_item_begin : String,
+    pub newline : String,
+    pub audio_begin : String,
+    pub video_begin : String,
+    pub variable_begin : String,
+    pub variable_middle : String,
+    pub variable_use : String,
+}
+
+impl LolcodeLexicalAnalyzer{
+    pub fn new(source: &str) -> Self{
+        Self {
+            input: source.chars().collect(),
+            position: 0,
+            current_build: String::new(),
+            tokens: Vec::new(),
+            lolcode_begin : "HAI".into(),
+            lolcode_end : "#KTHXBYE".into(),
+            comment_begin : "#OBTW".into(),
+            comment_end : "#TLDR".into(),
+            head_begin : "#MAEKHEAD".into(),
+            end_one : "#OIC".into(),
+            title_begin : "#GIMMEHTITLE".into(),
+            end_two : "#MKAY".into(),
+            paragraph_begin : "MAEKPARAGRAF".into(),
+            bold_begin : "GIMMEHBOLD".into(),
+            italics_begin : "#GIMMEHITALICS".into(),
+            list_begin : "#MAEKLIST".into(),
+            list_item_begin : "#GIMMEHITEM".into(),
+            newline : "#GIMMEHNEWLINE".into(),
+            audio_begin : "#GIMMEHSOUNDZ".into(),
+            video_begin : "#GIMMEHVIDZ".into(),
+            variable_begin : "#IHAZ".into(),
+            variable_middle : "#ITIZ".into(),
+            variable_use : "#LEMMESEE".into(),
+        }
+    }
+    pub fn tokenize(&mut self){
+        loop {
+            let c = self.get_char();
+            if c == '\0' {
+                break;
+            }
+            if c == '#' {
+                if !self.current_build.is_empty() {
+                        self.tokens.push(std::mem::take(&mut self.current_build));
+                }
+            } else {
+                self.add_char(c);
+            }
+        }
+        if !self.current_build.is_empty() {
+            self.tokens.push(std::mem::take(&mut self.current_build));
+        }
+        self.tokens.reverse();
+    }
+}
+
+impl LexicalAnalyzer for LolcodeLexicalAnalyzer{
+    fn get_char(&mut self) -> char{
+        if self.position < self.input.len(){
+            let c = self.input[self.position];
+            self.position += 1;
+            c
+        } else{
+            '\0'
+        }
+    }
+
+    fn add_char(&mut self, c: char){
+        self.current_build.push(c);
+    }
+
+    fn lookup(&self, s: &str) -> bool{
+        if !s.starts_with('#'){
+            return false;
+        }
+        self.lolcode_begin == s
+        || self.lolcode_end == s
+        || self.comment_begin == s
+        || self.comment_end == s
+        || self.head_begin == s
+        || self.end_one == s
+        || self.title_begin == s
+        || self.end_two == s
+        || self.paragraph_begin == s
+        || self.bold_begin == s
+        || self.italics_begin == s
+        || self.list_begin == s
+        || self.list_item_begin == s
+        || self.newline == s
+        || self.audio_begin == s
+        || self.video_begin == s
+        || self.variable_begin == s
+        || self.variable_middle == s
+        || self.variable_use == s
+    }
+}
+
+//--------------------syntax analyzer--------------------
+
+pub trait SyntaxAnalyzer {
+fn parse_lolcode(&mut self);
+fn parse_head(&mut self);
+fn parse_title(&mut self);
+fn parse_comment(&mut self);
+fn parse_body(&mut self);
+fn parse_paragraph(&mut self);
+fn parse_inner_paragraph(&mut self);
+fn parse_inner_text(&mut self);
+fn parse_variable_define(&mut self);
+fn parse_variable_use(&mut self);
+fn parse_bold(&mut self);
+fn parse_italics(&mut self);
+fn parse_list(&mut self);
+fn parse_list_items(&mut self);
+fn parse_inner_list(&mut self);
+fn parse_audio(&mut self);
+fn parse_video(&mut self);
+fn parse_newline(&mut self);
+fn parse_text(&mut self);
+}
+
+//--------------------main--------------------
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2{
@@ -12,5 +252,7 @@ fn main() {
         eprintln!("error reading file '{}': {}", filename, err);
         std::process::exit(1);
     });
-    println!("{}", lolspeak_string);
+    let mut compiler = LolcodeCompiler::new();
+    compiler.compile(&lolspeak_string);
+    compiler.parse();
 }
