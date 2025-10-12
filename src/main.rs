@@ -148,53 +148,86 @@ impl LolcodeLexicalAnalyzer{
             lolcode_end : "#KTHXBYE".into(),
             comment_begin : "#OBTW".into(),
             comment_end : "#TLDR".into(),
-            head_begin : "#MAEKHEAD".into(),
+            head_begin : "#MAEK HEAD".into(),
             end_one : "#OIC".into(),
-            title_begin : "#GIMMEHTITLE".into(),
+            title_begin : "#GIMMEH TITLE".into(),
             end_two : "#MKAY".into(),
-            paragraph_begin : "#MAEKPARAGRAF".into(),
-            bold_begin : "#GIMMEHBOLD".into(),
-            italics_begin : "#GIMMEHITALICS".into(),
-            list_begin : "#MAEKLIST".into(),
-            list_item_begin : "#GIMMEHITEM".into(),
-            newline : "#GIMMEHNEWLINE".into(),
-            audio_begin : "#GIMMEHSOUNDZ".into(),
-            video_begin : "#GIMMEHVIDZ".into(),
-            variable_begin : "#IHAZ".into(),
-            variable_middle : "#ITIZ".into(),
-            variable_use : "#LEMMESEE".into(),
+            paragraph_begin : "#MAEK PARAGRAF".into(),
+            bold_begin : "#GIMMEH BOLD".into(),
+            italics_begin : "#GIMMEH ITALICS".into(),
+            list_begin : "#MAEK LIST".into(),
+            list_item_begin : "#GIMMEH ITEM".into(),
+            newline : "#GIMMEH NEWLINE".into(),
+            audio_begin : "#GIMMEH SOUNDZ".into(),
+            video_begin : "#GIMMEH VIDZ".into(),
+            variable_begin : "#I HAZ".into(),
+            variable_middle : "#IT IZ".into(),
+            variable_use : "#LEMME SEE".into(),
         }
     }
     pub fn tokenize(&mut self) {
     let mut in_hash_token = false;
+
     loop {
         let c = self.get_char();
+
         if c == '\0' {
             if !self.current_build.is_empty() {
-                self.tokens.push(std::mem::take(&mut self.current_build));
+                // finalize last token
+                if in_hash_token {
+                    // uppercase all hashtag tokens
+                    let token = self.current_build.trim_end().to_uppercase();
+                    self.tokens.push(token);
+                } else {
+                    self.tokens.push(std::mem::take(&mut self.current_build));
+                }
             }
             break;
         }
+
         if c == '#' {
             if !self.current_build.is_empty() && !in_hash_token {
                 self.tokens.push(std::mem::take(&mut self.current_build));
             }
+
             in_hash_token = true;
             self.current_build.push(c);
-        } else if c.is_whitespace() {
+        } 
+        else if c.is_whitespace() {
             if in_hash_token {
-                self.tokens.push(std::mem::take(&mut self.current_build));
+                let mut lookahead_pos = self.position;
+                let mut next_word = String::new();
+                while lookahead_pos < self.input.len() && self.input[lookahead_pos].is_whitespace() {
+                    lookahead_pos += 1;
+                }
+                while lookahead_pos < self.input.len() && !self.input[lookahead_pos].is_whitespace() {
+                    next_word.push(self.input[lookahead_pos]);
+                    lookahead_pos += 1;
+                }
+                let combined = format!("{} {}", self.current_build.trim_end(), next_word).to_uppercase();
+                let single = self.current_build.trim_end().to_uppercase();
+                if self.lookup(&combined) {
+                    for _ in 0..next_word.len() {
+                        self.get_char();
+                    }
+                    self.tokens.push(combined);
+                } else {
+                    self.tokens.push(single);
+                }
+
+                self.current_build.clear();
                 in_hash_token = false;
             } else {
                 self.add_char(c);
             }
-        } else {
+        } 
+        else {
             self.add_char(c);
         }
     }
+
     self.tokens.reverse();
 }
-
 }
 
 impl LexicalAnalyzer for LolcodeLexicalAnalyzer{
