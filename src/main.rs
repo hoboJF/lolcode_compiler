@@ -30,45 +30,56 @@ impl LolcodeCompiler{
         }
     }
 
-    fn start(&mut self){
+    fn start(&mut self) {
         let candidate = self.lexer.tokens.pop().unwrap_or_default();
-        if self.lexer.lookup(&candidate){
-            self.current_token = candidate;
-        } else if !candidate.is_empty(){
-            eprintln!("lexical error: '{}' is not a recognized token.", candidate);
-            std::process::exit(1);
-        } else {
+        if candidate.is_empty() {
             eprintln!("user error: the provided code is empty");
             std::process::exit(1);
         }
+        if candidate.starts_with('#') {
+            if self.lexer.lookup(&candidate) {
+                self.current_token = candidate;
+            } else {
+                eprintln!("lexical error: '{}' is not a recognized token.", candidate);
+                std::process::exit(1);
+            }
+        } else {
+            self.current_token = candidate;
+        }
     }
-
-
-}
+    }
 
 impl Compiler for LolcodeCompiler{
     fn compile(&mut self, source: &str){
         self.lexer = LolcodeLexicalAnalyzer::new(source);
         self.lexer.tokenize();
-        self.start();
+    println!("--- Lexical Analysis ---");
+    while !self.lexer.tokens.is_empty() {
+        let tok = self.next_token();
+        if tok.is_empty() {
+            break;
+        }
+        println!("Token: '{}'", tok);
+    }
     }
 
-    fn next_token(&mut self) -> String{
+    fn next_token(&mut self) -> String {
         let candidate = self.lexer.tokens.pop().unwrap_or_default();
-        if !candidate.starts_with('#'){
-            self.current_token = candidate.clone();
-            candidate
-        }
-        else if self.lexer.lookup(&candidate){
-            self.current_token = candidate.clone();
-            candidate
-        } else if self.lexer.tokens.is_empty() {
+        if candidate.is_empty() {
             self.current_token.clear();
-            String::new()
+            return String::new();
         }
-        else{
-            eprintln!("lexical error: '{}' is not a recognized token", candidate);
-            std::process::exit(1);
+        if candidate.starts_with('#') {
+            if self.lexer.lookup(&candidate) {
+                self.current_token = candidate.clone();
+                candidate
+            } else {
+                eprintln!("lexical error: '{}' is not a recognized token", candidate);
+                std::process::exit(1);
+            }
+        } else {
+            self.current_token = candidate.clone();
+            candidate
         }
     }
 
@@ -132,7 +143,7 @@ impl LolcodeLexicalAnalyzer{
             position: 0,
             current_build: String::new(),
             tokens: Vec::new(),
-            lolcode_begin : "HAI".into(),
+            lolcode_begin : "#HAI".into(),
             lolcode_end : "#KTHXBYE".into(),
             comment_begin : "#OBTW".into(),
             comment_end : "#TLDR".into(),
@@ -140,8 +151,8 @@ impl LolcodeLexicalAnalyzer{
             end_one : "#OIC".into(),
             title_begin : "#GIMMEHTITLE".into(),
             end_two : "#MKAY".into(),
-            paragraph_begin : "MAEKPARAGRAF".into(),
-            bold_begin : "GIMMEHBOLD".into(),
+            paragraph_begin : "#MAEKPARAGRAF".into(),
+            bold_begin : "#GIMMEHBOLD".into(),
             italics_begin : "#GIMMEHITALICS".into(),
             list_begin : "#MAEKLIST".into(),
             list_item_begin : "#GIMMEHITEM".into(),
@@ -153,25 +164,36 @@ impl LolcodeLexicalAnalyzer{
             variable_use : "#LEMMESEE".into(),
         }
     }
-    pub fn tokenize(&mut self){
-        loop {
-            let c = self.get_char();
-            if c == '\0' {
-                break;
+    pub fn tokenize(&mut self) {
+    let mut in_hash_token = false;
+    loop {
+        let c = self.get_char();
+        if c == '\0' {
+            if !self.current_build.is_empty() {
+                self.tokens.push(std::mem::take(&mut self.current_build));
             }
-            if c == '#' {
-                if !self.current_build.is_empty() {
-                        self.tokens.push(std::mem::take(&mut self.current_build));
-                }
+            break;
+        }
+        if c == '#' {
+            if !self.current_build.is_empty() && !in_hash_token {
+                self.tokens.push(std::mem::take(&mut self.current_build));
+            }
+            in_hash_token = true;
+            self.current_build.push(c);
+        } else if c.is_whitespace() {
+            if in_hash_token {
+                self.tokens.push(std::mem::take(&mut self.current_build));
+                in_hash_token = false;
             } else {
                 self.add_char(c);
             }
+        } else {
+            self.add_char(c);
         }
-        if !self.current_build.is_empty() {
-            self.tokens.push(std::mem::take(&mut self.current_build));
-        }
-        self.tokens.reverse();
     }
+    self.tokens.reverse();
+}
+
 }
 
 impl LexicalAnalyzer for LolcodeLexicalAnalyzer{

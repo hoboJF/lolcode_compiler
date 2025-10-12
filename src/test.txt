@@ -1,1 +1,24 @@
 #HAI
+#OBTW This is a LOLCODE Markdown source file #TLDR
+#MAEKHEAD
+#GIMMEHTITLE The Simpsons #MKAY
+#OIC
+#MAEKPARAGRAF
+The Simpsons! #GIMMEHNEWLINE
+#GIMMEHSOUNDZ
+http://www.televisiontunes.com/themesongs/The%20Simpsons.mp3
+#MKAY
+#GIMMEHNEWLINE
+The members of the #GIMMEHBOLD Simpson #MKAY family are:
+#MAEKLIST
+#GIMMEHITEM Homer Simpson #MKAY
+#GIMMEHITEM Marge Simpson #MKAY
+#GIMMEHITEM Bart Simpson #MKAY
+#GIMMEHITEM Lisa Simpson #MKAY
+#GIMMEHITEM Maggie Simpson #MKAY
+#OIC
+#GIMMEHNEWLINE
+Lets watch now: #GIMMEHNEWLINE
+#GIMMEHVIDZ http://www.youtube.com/embed/zoO0s1ukcqQ #MKAY
+#OIC
+#KTHXBYE
