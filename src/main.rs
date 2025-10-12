@@ -194,33 +194,41 @@ impl LolcodeLexicalAnalyzer{
             self.current_build.push(c);
         } 
         else if c.is_whitespace() {
-            if in_hash_token {
-                let mut lookahead_pos = self.position;
-                let mut next_word = String::new();
-                while lookahead_pos < self.input.len() && self.input[lookahead_pos].is_whitespace() {
-                    lookahead_pos += 1;
-                }
-                while lookahead_pos < self.input.len() && !self.input[lookahead_pos].is_whitespace() {
-                    next_word.push(self.input[lookahead_pos]);
-                    lookahead_pos += 1;
-                }
-                let combined = format!("{} {}", self.current_build.trim_end(), next_word).to_uppercase();
-                let single = self.current_build.trim_end().to_uppercase();
-                if self.lookup(&combined) {
-                    for _ in 0..next_word.len() {
-                        self.get_char();
-                    }
-                    self.tokens.push(combined);
-                } else {
-                    self.tokens.push(single);
-                }
+    if in_hash_token {
+        let mut lookahead_pos = self.position;
+        let mut next_word = String::new();
+        while lookahead_pos < self.input.len() && self.input[lookahead_pos].is_whitespace() {
+            lookahead_pos += 1;
+        }
+        while lookahead_pos < self.input.len() && !self.input[lookahead_pos].is_whitespace() {
+            next_word.push(self.input[lookahead_pos]);
+            lookahead_pos += 1;
+        }
+        let single = self.current_build.trim_end().to_uppercase();
+        let combined = format!("{} {}", self.current_build.trim_end(), next_word).to_uppercase();
 
-                self.current_build.clear();
-                in_hash_token = false;
-            } else {
-                self.add_char(c);
+        let mut final_token = single.clone();
+        if self.lookup(&combined) {
+            for _ in 0..next_word.len() {
+                self.get_char();
             }
-        } 
+            final_token = combined;
+        } else if !self.lookup(&single) {
+            if combined.starts_with('#') {
+                final_token = combined;
+            }
+        }
+        self.tokens.push(final_token.clone());
+        if !self.lookup(&final_token) {
+            eprintln!("lexical error: '{}' is not a recognized token", final_token);
+        }
+
+        self.current_build.clear();
+        in_hash_token = false;
+    } else {
+        self.add_char(c);
+    }
+}
         else {
             self.add_char(c);
         }

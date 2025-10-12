@@ -1,11 +1,11 @@
 #hai
 #OBTW This is a LOLCODE Markdown source file #TLDR
 #TLDR
-#GIMMEH SOUNDZ le Simpsons #MKAY
+#GiMMEH soundz le Simpsons #MKAY
 #OIC
 #MAEK PARAGRAF
 The Simpsons! #GIMMEH NEWLINE
-#gimmeh soundz
+#gimmeh SoundS
 http://www.televisiontunes.com/themesongs/The%20Simpsons.mp3
 #MKAY
 #GIMMEH NEWLINE
