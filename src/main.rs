@@ -440,20 +440,60 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             self.parse_variable_use();
             self.parse_body();
         } else if (self.current_token == "#MAEK PARAGRAF"){
-                return;
+                self.parse_paragraph();
+                self.parse_body();
         } else {
                 eprintln!("syntax error: expected valid body token but found {} instead", self.current_token);
                 std::process::exit(1);
         }
     }
     fn parse_paragraph(&mut self){
-
+            self.parse_tree_push();
+            self.next_token();
+            self.parse_variable_define();
+            self.parse_inner_paragraph();
+            return;
     }
     fn parse_inner_paragraph(&mut self){
-
+        println!("{}", self.current_token);
+        if(self.current_token == "#OIC"){
+            self.parse_tree.push("#PARAGRAPH END".to_string());
+            self.next_token();
+            return;
+        }
+        else {
+            self.parse_inner_text();
+        }
     }
     fn parse_inner_text(&mut self){
-
+        if (!self.current_token.starts_with("#")){
+            self.parse_text();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#LEMME SEE"){
+            self.parse_variable_use();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#GIMMEH BOLD"){
+            self.parse_bold();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#GIMMEH ITALICS"){
+            self.parse_italics();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#GIMMEH NEWLINE"){
+            self.parse_newline();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#GIMMEH SOUNDZ"){
+            self.parse_audio();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#GIMMEH VIDZ"){
+            self.parse_video();
+            self.parse_inner_paragraph();
+        } else if (self.current_token == "#MAEK LIST"){
+            self.parse_list();
+            self.parse_inner_paragraph();
+        } else {
+                eprintln!("syntax error: expected valid paragraph body token but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_variable_define(&mut self){
         if (self.current_token == "#I HAZ"){
