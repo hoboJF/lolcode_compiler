@@ -32,20 +32,6 @@ impl LolcodeCompiler{
         }
     }
 
-    fn start(&mut self) {
-        let candidate = self.lexer.tokens.pop().unwrap_or_default();
-        if candidate.is_empty() {
-            eprintln!("user error: the provided code is empty");
-            std::process::exit(1);
-        }
-        if candidate.starts_with('#') {
-            if self.lexer.lookup(&candidate) {
-                self.current_token = candidate;
-            } 
-        } else {
-            self.current_token = candidate;
-        }
-    }
     }
 
 impl Compiler for LolcodeCompiler{
