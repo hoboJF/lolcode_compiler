@@ -336,11 +336,13 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             std::process::exit(1);
         }
         self.parse_tree_push();
-        println!("{:?}", self.parse_tree);
         if !self.token_vector.is_empty() {
             eprintln!("syntax error: extra tokens found after #KTHXBYE");
             std::process::exit(1);
         }
+        let mut semantics = LolcodeSemanticAnalyzer::new();
+        semantics.parse_tree = self.parse_tree.clone();
+        semantics.semantic_analysis();
     }
     
     fn parse_head(&mut self){
@@ -694,6 +696,42 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
     }
 }
 
+//--------------------semantic analysis--------------------
+
+pub struct LolcodeSemanticAnalyzer{
+    pub output: String,
+    pub parse_tree : Vec<String>,
+    pub current_token : String,
+}
+
+impl LolcodeSemanticAnalyzer{
+    pub fn new() -> Self{
+        Self {
+            output: String::new(),
+            parse_tree: Vec::new(),
+            current_token : String::new(),
+        }
+    }
+}
+
+pub trait SemanticAnalyzer{
+    fn semantic_analysis(&mut self);
+    fn next_token(&mut self);
+    fn push_output(&mut self);
+}
+
+impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
+    fn next_token(&mut self){
+        return;
+    }
+    fn push_output(&mut self){
+
+    }
+    fn semantic_analysis(&mut self){
+        println!("{:?}", self.parse_tree);
+    }
+}
+
 //--------------------main--------------------
 
 fn main() {
@@ -709,4 +747,5 @@ fn main() {
     });
     let mut compiler = LolcodeCompiler::new();
     compiler.compile(&lolspeak_string);
+    
 }
