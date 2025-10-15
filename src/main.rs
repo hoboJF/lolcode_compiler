@@ -460,7 +460,13 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             self.parse_tree_push();
             self.next_token();
             if (!self.current_token.starts_with("#")){
-                self.parse_text();
+                let var_test = self.current_token.trim();
+                if (var_test.contains(' ')){
+                            eprintln!("syntax error: {} is an invalid variable name", self.current_token);
+                            std::process::exit(1);
+                }
+                    self.parse_tree.push(var_test.to_string());
+                    self.next_token();
                 if (self.current_token == "#IT IZ"){
                     self.parse_tree_push();
                     self.next_token();
@@ -494,7 +500,13 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.parse_tree_push();
         self.next_token();
         if(!self.current_token.starts_with("#")){
-                self.parse_text();
+                let var_test = self.current_token.trim();
+                if (var_test.contains(' ')){
+                            eprintln!("syntax error: {} is an invalid variable name", self.current_token);
+                            std::process::exit(1);
+                }
+                    self.parse_tree.push(var_test.to_string());
+                    self.next_token();
                 if (self.current_token == "#MKAY"){
                     self.parse_tree.push("#VARIABLE USE END".to_string());
                     self.next_token();
