@@ -294,6 +294,7 @@ pub struct LolcodeSyntaxAnalyzer{
     pub token_vector: Vec<String>,
     pub parse_tree : Vec<String>,
     pub current_token : String,
+    pub output : String,
 }
 
 impl LolcodeSyntaxAnalyzer{
@@ -302,6 +303,7 @@ impl LolcodeSyntaxAnalyzer{
             token_vector: Vec::new(),
             parse_tree: Vec::new(),
             current_token : String::new(),
+            output: String::new(),
         }
     }
 }
@@ -344,6 +346,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         let mut semantics = LolcodeSemanticAnalyzer::new();
         semantics.parse_tree = self.parse_tree.clone();
         semantics.semantic_analysis();
+        self.output = semantics.output.clone();
     }
     
     fn parse_head(&mut self){
@@ -730,8 +733,20 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     }
     fn semantic_analysis(&mut self){
         self.parse_tree.reverse();
+        println!("{:?}", self.parse_tree);
         let mut body_var: HashMap<String, String> = HashMap::new();
         let mut paragraph_var: HashMap<String, String> = HashMap::new();
+        let mut paragraph_scope = false;
+        self.next_token();
+        loop{
+            if(self.current_token == "#HAI"){
+                self.output.push_str("<html>");
+                self.next_token();
+            } else if (self.current_token == "#KTHXBYE") {
+                self.output.push_str("</html>");
+                break;
+            }
+        }
     }
 }
 
@@ -750,5 +765,6 @@ fn main() {
     });
     let mut compiler = LolcodeCompiler::new();
     compiler.compile(&lolspeak_string);
-    
+    let html = compiler.syntaxer.output.clone();
+    println!("{}", html);
 }
