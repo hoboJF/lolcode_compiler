@@ -427,6 +427,12 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         } else if (self.current_token == "#GIMMEH NEWLINE"){
             self.parse_newline();
             self.parse_body();
+        } else if (self.current_token == "#GIMMEH SOUNDZ"){
+            self.parse_audio();
+            self.parse_body();
+        } else if (self.current_token == "#GIMMEH VIDZ"){
+            self.parse_video();
+            self.parse_body();
         }
     }
     fn parse_paragraph(&mut self){
@@ -499,6 +505,9 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
                     self.parse_tree.push("#LIST ITEM END".to_string());
                     self.next_token();
                     self.parse_list_items();
+            } else {
+                    eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                    std::process::exit(1);
             }
         } else {
                     eprintln!("syntax error: expected #GIMMEH ITEM but found {} instead", self.current_token);
@@ -523,10 +532,44 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         }
     }
     fn parse_audio(&mut self){
-
+        self.parse_tree_push();
+        self.next_token();
+        if (!self.current_token.starts_with("#")){
+            self.parse_text();
+            self.parse_tree_push();
+            self.next_token();
+            if (self.current_token == "#MKAY"){
+                self.parse_tree.push("#AUDIO END".to_string());
+                self.next_token();
+                return;
+            } else {
+                eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
+        } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_video(&mut self){
-
+        self.parse_tree_push();
+        self.next_token();
+        if (!self.current_token.starts_with("#")){
+            self.parse_text();
+            self.parse_tree_push();
+            self.next_token();
+            if (self.current_token == "#MKAY"){
+                self.parse_tree.push("#VIDEO END".to_string());
+                self.next_token();
+                return;
+            } else {
+                eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
+        } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_newline(&mut self){
         //this one pretty complicated all things considered
