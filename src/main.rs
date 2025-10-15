@@ -433,6 +433,12 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         } else if (self.current_token == "#GIMMEH VIDZ"){
             self.parse_video();
             self.parse_body();
+        } else if (self.current_token == "#I HAZ"){
+            self.parse_variable_define();
+            self.parse_body();
+        } else if (self.current_token == "#LEMME SEE"){
+            self.parse_variable_use();
+            self.parse_body();
         }
     }
     fn parse_paragraph(&mut self){
@@ -445,10 +451,61 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
 
     }
     fn parse_variable_define(&mut self){
-
+        if (self.current_token == "#I HAZ"){
+            println!("{}", self.current_token);
+            self.parse_tree_push();
+            self.next_token();
+            if (!self.current_token.starts_with("#")){
+                self.parse_text();
+                println!("Current token: {}", self.current_token);
+                if (self.current_token == "#IT IZ"){
+                    self.parse_tree_push();
+                    self.next_token();
+                    println!("Current token: {}", self.current_token);
+                    if (!self.current_token.starts_with("#")){
+                        self.parse_text();
+                        if (self.current_token == "#MKAY"){
+                            self.parse_tree.push("#VARIABLE INIT END".to_string());
+                            self.next_token();
+                            println!("Current token: {}", self.current_token);
+                            return;
+                        } else{
+                            eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                            std::process::exit(1);
+                        }
+                    } else {
+                        eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                        std::process::exit(1);
+                    }
+                } else {
+                    eprintln!("syntax error: expected #IT IZ but found {} instead", self.current_token);
+                    std::process::exit(1);
+                } 
+            } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
+        } else {
+            return;
+        }
     }
     fn parse_variable_use(&mut self){
-        return;
+        self.parse_tree_push();
+        self.next_token();
+        if(!self.current_token.starts_with("#")){
+                self.parse_text();
+                if (self.current_token == "#MKAY"){
+                    self.parse_tree.push("#VARIABLE USE END".to_string());
+                    self.next_token();
+                    return;
+                } else {
+                    eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                    std::process::exit(1);
+                }
+        } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_bold(&mut self){
         self.parse_tree_push();
