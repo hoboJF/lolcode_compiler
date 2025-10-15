@@ -337,25 +337,63 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.token_vector.reverse();
         self.next_token();
         if (self.current_token != "#HAI"){
-            eprintln!("error: expected #HAI but found {} instead", self.current_token);
+            eprintln!("syntax error: expected #HAI but found {} instead", self.current_token);
             std::process::exit(1);
         }
         self.parse_tree_push();
         self.next_token();
         self.parse_comment();
         self.parse_head();
-        println!("testing recursion");
         if (self.current_token != "#KTHXBYE"){
-            eprintln!("error: expected #KTHXBYE but found {} instead", self.current_token);
+            eprintln!("syntax error: expected #KTHXBYE but found {} instead", self.current_token);
+            std::process::exit(1);
+        }
+        if(!self.token_vector.is_empty()){
+            eprintln!("syntax error: extra tokens found after #KTHXBYE");
             std::process::exit(1);
         }
     }
     
     fn parse_head(&mut self){
-        return;
+        if (self.current_token == "#MAEK HEAD"){
+            self.parse_tree_push();
+            self.next_token();
+            self.parse_title();
+            if(self.current_token == "#OIC"){
+                self.parse_tree.push("#HEAD END".to_string());
+                self.next_token();
+                return;
+            } else {
+                eprintln!("syntax error: expected #OIC but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
+        } else{
+            return;
+        }
     }
     fn parse_title(&mut self){
-
+        if (self.current_token == "#GIMMEH TITLE"){
+            self.parse_tree_push();
+            self.next_token();
+            if (!self.current_token.starts_with("#")){
+                self.parse_tree_push();
+                self.next_token();
+                if(self.current_token == "#MKAY"){
+                    self.parse_tree.push("#TITLE END".to_string());
+                    self.next_token();
+                    return;
+                } else {
+                    eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                    std::process::exit(1);
+                }
+            } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
+        } else {
+            eprintln!("syntax error: expected #GIMMEH TITLE but found {} instead", self.current_token);
+            std::process::exit(1);
+        }
     }
     fn parse_comment(&mut self){
         if (self.current_token == "#TLDR"){
