@@ -344,6 +344,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.next_token();
         self.parse_comment();
         self.parse_head();
+        self.parse_body();
         if (self.current_token != "#KTHXBYE"){
             eprintln!("syntax error: expected #KTHXBYE but found {} instead", self.current_token);
             std::process::exit(1);
@@ -420,7 +421,13 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         }
     }
     fn parse_body(&mut self){
-
+        if(self.current_token == "#KTHXBYE"){
+            return
+        } else if (!self.current_token.starts_with("#")){
+            self.parse_tree_push();
+            self.next_token();
+            self.parse_body();
+        }
     }
     fn parse_paragraph(&mut self){
 
