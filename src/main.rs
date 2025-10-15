@@ -408,11 +408,11 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
                     self.next_token();
                     self.parse_comment();
                 } else {
-                    eprintln!("error: expected #OBTW but found {} instead", self.current_token);
+                    eprintln!("syntax error: expected #OBTW but found {} instead", self.current_token);
                     std::process::exit(1);
                 }
             } else {
-                eprintln!("error: expected text but found {} instead", self.current_token);
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
                 std::process::exit(1);
             }
 
@@ -426,6 +426,12 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         } else if (!self.current_token.starts_with("#")){
             self.parse_tree_push();
             self.next_token();
+            self.parse_body();
+        } else if (self.current_token == "#GIMMEH BOLD"){
+            self.parse_bold();
+            self.parse_body();
+        } else if (self.current_token == "#GIMMEH ITALICS"){
+            self.parse_italics();
             self.parse_body();
         }
     }
@@ -445,10 +451,42 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
 
     }
     fn parse_bold(&mut self){
-
+        self.parse_tree_push();
+        self.next_token();
+        if(!self.current_token.starts_with("#")){
+                self.parse_tree_push();
+                self.next_token();
+                if (self.current_token == "#MKAY"){
+                    self.parse_tree.push("#BOLD END".to_string());
+                    self.next_token();
+                    return;
+                } else {
+                    eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                    std::process::exit(1);
+                }
+        } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_italics(&mut self){
-
+        self.parse_tree_push();
+        self.next_token();
+        if(!self.current_token.starts_with("#")){
+                self.parse_tree_push();
+                self.next_token();
+                if (self.current_token == "#MKAY"){
+                    self.parse_tree.push("#ITALICS END".to_string());
+                    self.next_token();
+                    return;
+                } else {
+                    eprintln!("syntax error: expected #MKAY but found {} instead", self.current_token);
+                    std::process::exit(1);
+                }
+        } else {
+                eprintln!("syntax error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+        }
     }
     fn parse_list(&mut self){
 
