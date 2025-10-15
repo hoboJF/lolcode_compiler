@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::collections::HashMap;
 
 //--------------------compiler--------------------
 
@@ -729,17 +730,8 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     }
     fn semantic_analysis(&mut self){
         self.parse_tree.reverse();
-        println!("{:?}", self.parse_tree);
-        self.next_token();
-        println!("{}", self.current_token);
-        self.push_output();
-        self.next_token();
-        self.push_output();
-        self.next_token();
-        self.push_output();
-        self.next_token();
-        self.push_output();
-        println!("{}", self.output);
+        let mut body_var: HashMap<String, String> = HashMap::new();
+        let mut paragraph_var: HashMap<String, String> = HashMap::new();
     }
 }
 
