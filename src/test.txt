@@ -3,10 +3,13 @@
 #MAEK hEaD #GIMMEH TITLE cool document #mkAY  		 	
 		   
 						 #OIC
-
+#GIMMEH NEWLINE
       #GIMMEH ITALICS i ran out of things to write ngl #MKAY
 #GIMMEH BOLD cool #MKAY
 something cool here btw wow
+			#GIMMEH NEWLINE
+#MAEK LIST #GIMMEH ITEM #GIMMEH ITALICS something #MKAY #MKAY #GIMMEH ITEM #MKAY #gimmeh item woooooowwowooowowowowowoo #mkay     		  #OiC
 
+#MAEK LIST #OIC #GIMMEH NEWLINE
 
 #kthxbye

@@ -349,6 +349,8 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             eprintln!("syntax error: expected #KTHXBYE but found {} instead", self.current_token);
             std::process::exit(1);
         }
+        self.parse_tree_push();
+        println!("{:?}", self.parse_tree);
         if(!self.token_vector.is_empty()){
             eprintln!("syntax error: extra tokens found after #KTHXBYE");
             std::process::exit(1);
@@ -377,8 +379,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             self.parse_tree_push();
             self.next_token();
             if (!self.current_token.starts_with("#")){
-                self.parse_tree_push();
-                self.next_token();
+                self.parse_text();
                 if(self.current_token == "#MKAY"){
                     self.parse_tree.push("#TITLE END".to_string());
                     self.next_token();
@@ -401,8 +402,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             self.parse_tree_push();
             self.next_token();
             if(!self.current_token.starts_with("#")){
-                self.parse_tree_push();
-                self.next_token();
+                self.parse_text();
                 if(self.current_token == "#OBTW"){
                     self.parse_tree_push();
                     self.next_token();
@@ -424,14 +424,22 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         if(self.current_token == "#KTHXBYE"){
             return
         } else if (!self.current_token.starts_with("#")){
-            self.parse_tree_push();
-            self.next_token();
+            self.parse_text();
             self.parse_body();
         } else if (self.current_token == "#GIMMEH BOLD"){
             self.parse_bold();
             self.parse_body();
         } else if (self.current_token == "#GIMMEH ITALICS"){
             self.parse_italics();
+            self.parse_body();
+        } else if (self.current_token == "#GIMMEH NEWLINE"){
+            self.parse_newline();
+            self.parse_body();
+        } else if (self.current_token == "#MAEK LIST"){
+            self.parse_list();
+            self.parse_body();
+        } else if (self.current_token == "#GIMMEH NEWLINE"){
+            self.parse_newline();
             self.parse_body();
         }
     }
@@ -448,14 +456,13 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
 
     }
     fn parse_variable_use(&mut self){
-
+        return;
     }
     fn parse_bold(&mut self){
         self.parse_tree_push();
         self.next_token();
         if(!self.current_token.starts_with("#")){
-                self.parse_tree_push();
-                self.next_token();
+                self.parse_text();
                 if (self.current_token == "#MKAY"){
                     self.parse_tree.push("#BOLD END".to_string());
                     self.next_token();
@@ -473,8 +480,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.parse_tree_push();
         self.next_token();
         if(!self.current_token.starts_with("#")){
-                self.parse_tree_push();
-                self.next_token();
+                self.parse_text();
                 if (self.current_token == "#MKAY"){
                     self.parse_tree.push("#ITALICS END".to_string());
                     self.next_token();
@@ -489,13 +495,46 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         }
     }
     fn parse_list(&mut self){
-
+        self.parse_tree_push();
+        self.next_token();
+        self.parse_list_items();
+        return;
     }
     fn parse_list_items(&mut self){
-
+        if (self.current_token == "#OIC"){
+            self.parse_tree.push("#LIST END".to_string());
+            self.next_token();
+            return
+        } else if (self.current_token == "#GIMMEH ITEM"){
+            self.parse_tree_push();
+            self.next_token();
+            self.parse_inner_list();
+            if (self.current_token == "#MKAY"){
+                    self.parse_tree.push("#LIST ITEM END".to_string());
+                    self.next_token();
+                    self.parse_list_items();
+            }
+        } else {
+                    eprintln!("syntax error: expected #GIMMEH ITEM but found {} instead", self.current_token);
+                    std::process::exit(1);
+        }
     }
     fn parse_inner_list(&mut self){
-
+        if(self.current_token == "#GIMMEH BOLD"){
+            self.parse_bold();
+            return;
+        } else if (self.current_token == "#GIMMEH ITALICS"){
+            self.parse_italics();
+            return;
+        } else if (!self.current_token.starts_with("#")){
+            self.parse_text();
+            return;
+        } else if (self.current_token == "#LEMME SEE"){
+            self.parse_variable_use();
+            return;
+        } else {
+            return;
+        }
     }
     fn parse_audio(&mut self){
 
@@ -504,10 +543,16 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
 
     }
     fn parse_newline(&mut self){
-
+        //this one pretty complicated all things considered
+        self.parse_tree_push();
+        self.next_token();
+        return;
     }
     fn parse_text(&mut self){
-
+        //this one was also pretty complicated
+        self.parse_tree_push();
+        self.next_token();
+        return;
     }
 }
 
