@@ -536,8 +536,6 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.next_token();
         if (!self.current_token.starts_with("#")){
             self.parse_text();
-            self.parse_tree_push();
-            self.next_token();
             if (self.current_token == "#MKAY"){
                 self.parse_tree.push("#AUDIO END".to_string());
                 self.next_token();
@@ -556,8 +554,6 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.next_token();
         if (!self.current_token.starts_with("#")){
             self.parse_text();
-            self.parse_tree_push();
-            self.next_token();
             if (self.current_token == "#MKAY"){
                 self.parse_tree.push("#VIDEO END".to_string());
                 self.next_token();
