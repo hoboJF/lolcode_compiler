@@ -71,19 +71,16 @@ impl Compiler for LolcodeCompiler{
 
     fn parse(&mut self){
         while !self.lexer.tokens.is_empty() {
-
         let mut tok = self.next_token();
-
         if tok.is_empty() {
-
             break;
-
         }
-
+        if tok.trim().is_empty() {
+            continue;
+        }
         println!("Token: '{}'", tok);
         self.syntaxer.token_vector.push(std::mem::take(&mut tok));
-
-    }
+        }
     self.syntaxer.parse_lolcode();
     }
 
@@ -345,7 +342,6 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         }
         self.parse_tree_push();
         self.next_token();
-        println!("{}", self.current_token);
         self.parse_comment();
         self.parse_head();
         println!("testing recursion");
@@ -365,7 +361,6 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         if (self.current_token == "#TLDR"){
             self.parse_tree_push();
             self.next_token();
-            println!("{}", self.current_token);
             if(!self.current_token.starts_with("#")){
                 self.parse_tree_push();
                 self.next_token();
