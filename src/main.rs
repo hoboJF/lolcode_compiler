@@ -41,10 +41,7 @@ impl LolcodeCompiler{
         if candidate.starts_with('#') {
             if self.lexer.lookup(&candidate) {
                 self.current_token = candidate;
-            } else {
-                eprintln!("lexical error: '{}' is not a recognized token.", candidate);
-                std::process::exit(1);
-            }
+            } 
         } else {
             self.current_token = candidate;
         }
@@ -55,7 +52,7 @@ impl Compiler for LolcodeCompiler{
     fn compile(&mut self, source: &str){
         self.lexer = LolcodeLexicalAnalyzer::new(source);
         self.lexer.tokenize();
-        self.start()
+        self.parse();
     }
 
     fn next_token(&mut self) -> String {
@@ -73,8 +70,21 @@ impl Compiler for LolcodeCompiler{
     }
 
     fn parse(&mut self){
-        println!("{}", self.current_token);
-        self.syntaxer.parse_lolcode();
+        while !self.lexer.tokens.is_empty() {
+
+        let mut tok = self.next_token();
+
+        if tok.is_empty() {
+
+            break;
+
+        }
+
+        println!("Token: '{}'", tok);
+        self.syntaxer.token_vector.push(std::mem::take(&mut tok));
+
+    }
+    self.syntaxer.parse_lolcode();
     }
 
     fn current_token(&self) -> String{
@@ -210,6 +220,7 @@ impl LolcodeLexicalAnalyzer{
         self.tokens.push(final_token.clone());
         if !self.lookup(&final_token) {
             eprintln!("lexical error: '{}' is not a recognized token", final_token);
+            std::process::exit(1);
         }
 
         self.current_build.clear();
@@ -271,6 +282,7 @@ impl LexicalAnalyzer for LolcodeLexicalAnalyzer{
 //--------------------syntax analyzer--------------------
 
 pub trait SyntaxAnalyzer {
+fn grab_token(&mut self, token: String);
 fn parse_lolcode(&mut self);
 fn parse_head(&mut self);
 fn parse_title(&mut self);
@@ -293,21 +305,33 @@ fn parse_text(&mut self);
 }
 
 pub struct LolcodeSyntaxAnalyzer{
+    pub token_vector: Vec<String>,
     pub parse_tree : Vec<String>,
 }
 
 impl LolcodeSyntaxAnalyzer{
     pub fn new() -> Self{
         Self {
+            token_vector: Vec::new(),
             parse_tree: Vec::new(),
         }
     }
 }
 
 impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
-    fn parse_lolcode(&mut self){
-        
+    
+    fn grab_token(&mut self, token: String){
+        self.token_vector.push(token);
     }
+
+    fn parse_lolcode(&mut self){
+        self.token_vector.reverse();
+        let current_token = self.token_vector.pop().unwrap();
+        if(current_token != "#HAI"){
+            println!("sup");
+        }
+    }
+    
     fn parse_head(&mut self){
 
     }
@@ -379,5 +403,4 @@ fn main() {
     });
     let mut compiler = LolcodeCompiler::new();
     compiler.compile(&lolspeak_string);
-    compiler.parse();
 }
