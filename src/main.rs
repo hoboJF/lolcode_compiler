@@ -722,13 +722,24 @@ pub trait SemanticAnalyzer{
 
 impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     fn next_token(&mut self){
-        return;
+        self.current_token = self.parse_tree.pop().unwrap();
     }
     fn push_output(&mut self){
-
+        self.output.push_str(&self.current_token);
     }
     fn semantic_analysis(&mut self){
+        self.parse_tree.reverse();
         println!("{:?}", self.parse_tree);
+        self.next_token();
+        println!("{}", self.current_token);
+        self.push_output();
+        self.next_token();
+        self.push_output();
+        self.next_token();
+        self.push_output();
+        self.next_token();
+        self.push_output();
+        println!("{}", self.output);
     }
 }
 
