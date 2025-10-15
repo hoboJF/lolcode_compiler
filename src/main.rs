@@ -19,6 +19,7 @@ fn set_current_token(&mut self, tok: String);
 pub struct LolcodeCompiler{
     lexer: LolcodeLexicalAnalyzer,
     current_token: String,
+    syntaxer: LolcodeSyntaxAnalyzer,
 }
 
 impl LolcodeCompiler{
@@ -27,6 +28,7 @@ impl LolcodeCompiler{
         Self {
             lexer: LolcodeLexicalAnalyzer::new(""),
             current_token: String::new(),
+            syntaxer: LolcodeSyntaxAnalyzer::new()
         }
     }
 
@@ -53,39 +55,26 @@ impl Compiler for LolcodeCompiler{
     fn compile(&mut self, source: &str){
         self.lexer = LolcodeLexicalAnalyzer::new(source);
         self.lexer.tokenize();
-    println!("--- Lexical Analysis ---");
-    while !self.lexer.tokens.is_empty() {
-        let tok = self.next_token();
-        if tok.is_empty() {
-            break;
-        }
-        println!("Token: '{}'", tok);
-        }
-        //self.start()
+        self.start()
     }
 
     fn next_token(&mut self) -> String {
         let candidate = self.lexer.tokens.pop().unwrap_or_default();
-        if candidate.is_empty() {
-            self.current_token.clear();
-            return String::new();
-        }
-        if candidate.starts_with('#') {
-            if self.lexer.lookup(&candidate) {
-                self.current_token = candidate.clone();
-                candidate
-            } else {
-                eprintln!("lexical error: '{}' is not a recognized token", candidate);
-                std::process::exit(1);
-            }
-        } else {
+        if self.lexer.lookup(&candidate) || !candidate.starts_with('#') {
             self.current_token = candidate.clone();
             candidate
+        } else if self.lexer.tokens.is_empty() {
+            self.current_token.clear();
+            String::new()
+        } else {
+            eprintln!("Lexical error: '{}' is not a recognized token.", candidate);
+            std::process::exit(1);
         }
     }
 
     fn parse(&mut self){
-        
+        println!("{}", self.current_token);
+        self.syntaxer.parse_lolcode();
     }
 
     fn current_token(&self) -> String{
@@ -301,6 +290,78 @@ fn parse_audio(&mut self);
 fn parse_video(&mut self);
 fn parse_newline(&mut self);
 fn parse_text(&mut self);
+}
+
+pub struct LolcodeSyntaxAnalyzer{
+    pub parse_tree : Vec<String>,
+}
+
+impl LolcodeSyntaxAnalyzer{
+    pub fn new() -> Self{
+        Self {
+            parse_tree: Vec::new(),
+        }
+    }
+}
+
+impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
+    fn parse_lolcode(&mut self){
+        
+    }
+    fn parse_head(&mut self){
+
+    }
+    fn parse_title(&mut self){
+
+    }
+    fn parse_comment(&mut self){
+
+    }
+    fn parse_body(&mut self){
+
+    }
+    fn parse_paragraph(&mut self){
+
+    }
+    fn parse_inner_paragraph(&mut self){
+
+    }
+    fn parse_inner_text(&mut self){
+
+    }
+    fn parse_variable_define(&mut self){
+
+    }
+    fn parse_variable_use(&mut self){
+
+    }
+    fn parse_bold(&mut self){
+
+    }
+    fn parse_italics(&mut self){
+
+    }
+    fn parse_list(&mut self){
+
+    }
+    fn parse_list_items(&mut self){
+
+    }
+    fn parse_inner_list(&mut self){
+
+    }
+    fn parse_audio(&mut self){
+
+    }
+    fn parse_video(&mut self){
+
+    }
+    fn parse_newline(&mut self){
+
+    }
+    fn parse_text(&mut self){
+
+    }
 }
 
 //--------------------main--------------------
