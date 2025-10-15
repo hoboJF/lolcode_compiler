@@ -302,11 +302,14 @@ fn parse_audio(&mut self);
 fn parse_video(&mut self);
 fn parse_newline(&mut self);
 fn parse_text(&mut self);
+fn parse_tree_push(&mut self);
+fn next_token(&mut self);
 }
 
 pub struct LolcodeSyntaxAnalyzer{
     pub token_vector: Vec<String>,
     pub parse_tree : Vec<String>,
+    pub current_token : String,
 }
 
 impl LolcodeSyntaxAnalyzer{
@@ -314,6 +317,7 @@ impl LolcodeSyntaxAnalyzer{
         Self {
             token_vector: Vec::new(),
             parse_tree: Vec::new(),
+            current_token : String::new(),
         }
     }
 }
@@ -324,23 +328,63 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.token_vector.push(token);
     }
 
+    fn parse_tree_push(&mut self){
+        self.parse_tree.push(self.current_token.clone());
+    }
+
+    fn next_token(&mut self){
+        self.current_token = self.token_vector.pop().unwrap();
+    }
+
     fn parse_lolcode(&mut self){
         self.token_vector.reverse();
-        let current_token = self.token_vector.pop().unwrap();
-        if (current_token != "#HAI"){
-            eprintln!("error: expected #HAI but found {} instead", current_token);
+        self.next_token();
+        if (self.current_token != "#HAI"){
+            eprintln!("error: expected #HAI but found {} instead", self.current_token);
+            std::process::exit(1);
+        }
+        self.parse_tree_push();
+        self.next_token();
+        println!("{}", self.current_token);
+        self.parse_comment();
+        self.parse_head();
+        println!("testing recursion");
+        if (self.current_token != "#KTHXBYE"){
+            eprintln!("error: expected #KTHXBYE but found {} instead", self.current_token);
             std::process::exit(1);
         }
     }
     
     fn parse_head(&mut self){
-
+        return;
     }
     fn parse_title(&mut self){
 
     }
     fn parse_comment(&mut self){
+        if (self.current_token == "#TLDR"){
+            self.parse_tree_push();
+            self.next_token();
+            println!("{}", self.current_token);
+            if(!self.current_token.starts_with("#")){
+                self.parse_tree_push();
+                self.next_token();
+                if(self.current_token == "#OBTW"){
+                    self.parse_tree_push();
+                    self.next_token();
+                    self.parse_comment();
+                } else {
+                    eprintln!("error: expected #OBTW but found {} instead", self.current_token);
+                    std::process::exit(1);
+                }
+            } else {
+                eprintln!("error: expected text but found {} instead", self.current_token);
+                std::process::exit(1);
+            }
 
+        } else {
+            return;
+        }
     }
     fn parse_body(&mut self){
 
