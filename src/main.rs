@@ -327,8 +327,9 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
     fn parse_lolcode(&mut self){
         self.token_vector.reverse();
         let current_token = self.token_vector.pop().unwrap();
-        if(current_token != "#HAI"){
-            println!("sup");
+        if (current_token != "#HAI"){
+            eprintln!("error: expected #HAI but found {} instead", current_token);
+            std::process::exit(1);
         }
     }
     
