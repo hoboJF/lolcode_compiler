@@ -384,17 +384,17 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         }
     }
     fn parse_comment(&mut self){
-        if (self.current_token == "#TLDR"){
+        if (self.current_token == "#OBTW"){
             self.parse_tree_push();
             self.next_token();
             if(!self.current_token.starts_with("#")){
                 self.parse_text();
-                if(self.current_token == "#OBTW"){
+                if(self.current_token == "#TLDR"){
                     self.parse_tree_push();
                     self.next_token();
                     self.parse_comment();
                 } else {
-                    eprintln!("syntax error: expected #OBTW but found {} instead", self.current_token);
+                    eprintln!("syntax error: expected #TLDR but found {} instead", self.current_token);
                     std::process::exit(1);
                 }
             } else {
@@ -406,6 +406,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             return;
         }
     }
+
     fn parse_body(&mut self){
         if(self.current_token == "#KTHXBYE"){
             return
@@ -442,6 +443,9 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         } else if (self.current_token == "#MAEK PARAGRAF"){
                 self.parse_paragraph();
                 self.parse_body();
+        } else if (self.current_token == "#OBTW"){
+            self.parse_comment();
+            self.parse_body();
         } else {
                 eprintln!("syntax error: expected valid body token but found {} instead", self.current_token);
                 std::process::exit(1);
@@ -455,7 +459,6 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             return;
     }
     fn parse_inner_paragraph(&mut self){
-        println!("{}", self.current_token);
         if(self.current_token == "#OIC"){
             self.parse_tree.push("#PARAGRAPH END".to_string());
             self.next_token();
