@@ -68,7 +68,6 @@ impl Compiler for LolcodeCompiler{
         if tok.trim().is_empty() {
             continue;
         }
-        println!("Token: '{}'", tok);
         self.syntaxer.token_vector.push(std::mem::take(&mut tok));
         }
     self.syntaxer.parse_lolcode();
@@ -736,7 +735,6 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     }
     fn semantic_analysis(&mut self){
         self.parse_tree.reverse();
-        println!("{:?}", self.parse_tree);
         let mut body_var: HashMap<String, String> = HashMap::new();
         let mut paragraph_var: HashMap<String, String> = HashMap::new();
         let mut paragraph_scope = false;
