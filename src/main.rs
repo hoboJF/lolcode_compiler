@@ -775,6 +775,26 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
             } else if (self.current_token == "#GIMMEH NEWLINE"){
                 self.output.push_str("<br>");
                 self.next_token();
+            } else if (self.current_token == "#MAEK PARAGRAF"){
+                self.output.push_str("<p>");
+                self.next_token();
+                paragraph_scope = true;
+            } else if (self.current_token == "#PARAGRAPH END"){
+                self.output.push_str("</p>");
+                self.next_token();
+                paragraph_scope = false;
+            } else if (self.current_token == "#MAEK LIST"){
+                self.output.push_str("<ul>");
+                self.next_token();
+            } else if (self.current_token == "#GIMMEH ITEM"){
+                self.output.push_str("<li>");
+                self.next_token();
+            } else if (self.current_token == "#LIST ITEM END"){
+                self.output.push_str("</li>");
+                self.next_token();
+            } else if (self.current_token == "#LIST END"){
+                self.output.push_str("</ul>");
+                self.next_token();
             }
         }
     }
