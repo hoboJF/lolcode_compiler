@@ -1,6 +1,9 @@
 use std::env;
 use std::fs;
 use std::collections::HashMap;
+use std::io::Write;
+use std::fs::File;
+use std::process::Command;
 
 //--------------------compiler--------------------
 
@@ -882,6 +885,37 @@ fn main() {
     });
     let mut compiler = LolcodeCompiler::new();
     compiler.compile(&lolspeak_string);
+    let raw_filename = filename.split('.').next().unwrap_or(filename);
     let html = compiler.syntaxer.output.clone();
-    println!("{}", html);
+    let html_filename = format!("{}.html", raw_filename);
+    let mut file = match File::create(&html_filename) {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!("Error creating file '{}': {}", html_filename, e);
+            std::process::exit(1);
+        }
+    };
+    if let Err(e) = file.write_all(html.as_bytes()) {
+    eprintln!("Error writing to file: {}", e);
+    }
+    let current_dir = match env::current_dir() {
+    Ok(dir) => dir,
+    Err(e) => {
+        eprintln!("Error getting current directory: {}", e);
+        std::process::exit(1);
+    }
+    };
+    let full_path = current_dir.join(html_filename);
+    let file_path: String = full_path.to_string_lossy().into_owned();
+    let chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe";
+    match Command::new(chrome_path)
+        .arg(file_path)
+        .spawn() 
+    {
+        Ok(_) => println!("Opening file in Chrome"),
+        Err(e) => {
+            eprintln!("Failed to open Chrome: {}", e);
+            std::process::exit(1);
+        }
+    }
 }
