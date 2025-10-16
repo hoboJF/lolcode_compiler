@@ -795,6 +795,24 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
             } else if (self.current_token == "#LIST END"){
                 self.output.push_str("</ul>");
                 self.next_token();
+            } else if (self.current_token == "#OBTW"){
+                self.output.push_str("<!--");
+                self.next_token();
+            } else if (self.current_token == "#TLDR"){
+                self.output.push_str("-->");
+                self.next_token();
+            } else if (self.current_token == "#MAEK HEAD"){
+                self.output.push_str("<head>");
+                self.next_token();
+            } else if (self.current_token == "#GIMMEH TITLE"){
+                self.output.push_str("<title>");
+                self.next_token();
+            } else if (self.current_token == "#TITLE END"){
+                self.output.push_str("</title>");
+                self.next_token();
+            } else if (self.current_token == "#HEAD END"){
+                self.output.push_str("</head>");
+                self.next_token();
             }
         }
     }
