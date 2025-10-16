@@ -745,6 +745,21 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
             } else if (self.current_token == "#KTHXBYE") {
                 self.output.push_str("</html>");
                 break;
+            } else if (self.current_token == "#GIMMEH BOLD"){
+                self.output.push_str("<b>");
+                self.next_token();
+            } else if (self.current_token == "#BOLD END"){
+                self.output.push_str("</b>");
+                self.next_token();
+            } else if (!self.current_token.starts_with("#")){
+                self.push_output();
+                self.next_token();
+            } else if (self.current_token == "#GIMMEH ITALICS"){
+                self.output.push_str("<i>");
+                self.next_token();
+            } else if (self.current_token == "#ITALICS END"){
+                self.output.push_str("</i>");
+                self.next_token();
             }
         }
     }
