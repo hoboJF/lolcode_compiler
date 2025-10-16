@@ -737,6 +737,8 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
         let mut body_var: HashMap<String, String> = HashMap::new();
         let mut paragraph_var: HashMap<String, String> = HashMap::new();
         let mut paragraph_scope = false;
+        let mut var_name: String;
+        let mut var_value : String;
         self.next_token();
         loop{
             if(self.current_token == "#HAI"){
@@ -783,6 +785,7 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
                 self.output.push_str("</p>");
                 self.next_token();
                 paragraph_scope = false;
+                paragraph_var.clear();
             } else if (self.current_token == "#MAEK LIST"){
                 self.output.push_str("<ul>");
                 self.next_token();
@@ -813,11 +816,57 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
             } else if (self.current_token == "#HEAD END"){
                 self.output.push_str("</head>");
                 self.next_token();
+            } else if (self.current_token == "#I HAZ"){
+                self.next_token();
+                var_name = self.current_token.clone();
+                self.next_token();
+                self.next_token();
+                var_value = self.current_token.clone();
+                self.next_token();
+                self.next_token();
+                if (paragraph_scope){
+                    paragraph_var.insert(var_name.to_string(), var_value.to_string());
+                } else {
+                    body_var.insert(var_name.to_string(), var_value.to_string());
+                }
+            } else if (self.current_token == "#LEMME SEE"){
+                self.next_token();
+                let var_name = self.current_token.clone();
+                if(paragraph_scope){
+                    if paragraph_var.contains_key(&var_name){
+                        let final_var_value = paragraph_var.get(&var_name);
+                        match final_var_value{
+                            Some(value) => self.output.push_str(value),
+                            None =>println!("whoops, this shouldnt output"),
+                        }
+                    }  else if body_var.contains_key(&var_name){
+                        let final_var_value = body_var.get(&var_name);
+                        match final_var_value{
+                            Some(value) => self.output.push_str(value),
+                            None =>println!("whoops, this shouldnt output"),
+                        }
+                    } else {
+                        eprintln!("static semantic error: variable {} not found in scope", self.current_token);
+                        std::process::exit(1);
+                    }
+                    }else {
+                    if body_var.contains_key(&var_name){
+                        let final_var_value = body_var.get(&var_name);
+                        match final_var_value{
+                            Some(value) => self.output.push_str(value),
+                            None =>println!("whoops, this shouldnt output"),
+                        }
+                    } else {
+                        eprintln!("static semantic error: variable {} not found in scope", self.current_token);
+                        std::process::exit(1);
+                    }
+                }
+                self.next_token();
+                self.next_token();
+                }
             }
         }
     }
-}
-
 //--------------------main--------------------
 
 fn main() {
