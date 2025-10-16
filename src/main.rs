@@ -760,6 +760,21 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
             } else if (self.current_token == "#ITALICS END"){
                 self.output.push_str("</i>");
                 self.next_token();
+            } else if (self.current_token == "#GIMMEH SOUNDZ"){
+                self.output.push_str("<audio controls> <source src=\"");
+                self.next_token();
+            } else if (self.current_token == "#AUDIO END"){
+                self.output.push_str("\"></audio>");
+                self.next_token();
+            } else if (self.current_token == "#GIMMEH VIDZ"){
+                self.output.push_str("<iframe src=\"");
+                self.next_token();
+            } else if (self.current_token == "#VIDEO END"){
+                self.output.push_str("\"/>");
+                self.next_token();
+            } else if (self.current_token == "#GIMMEH NEWLINE"){
+                self.output.push_str("<br>");
+                self.next_token();
             }
         }
     }
