@@ -744,82 +744,82 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
         let mut var_value : String;
         self.next_token();
         loop{
-            if(self.current_token == "#HAI"){
+            if self.current_token == "#HAI" {
                 self.output.push_str("<html>");
                 self.next_token();
-            } else if (self.current_token == "#KTHXBYE") {
+            } else if self.current_token == "#KTHXBYE" {
                 self.output.push_str("</html>");
                 break;
-            } else if (self.current_token == "#GIMMEH BOLD"){
+            } else if self.current_token == "#GIMMEH BOLD" {
                 self.output.push_str("<b>");
                 self.next_token();
-            } else if (self.current_token == "#BOLD END"){
+            } else if self.current_token == "#BOLD END" {
                 self.output.push_str("</b>");
                 self.next_token();
-            } else if (!self.current_token.starts_with("#")){
+            } else if !self.current_token.starts_with("#") {
                 self.push_output();
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH ITALICS"){
+            } else if self.current_token == "#GIMMEH ITALICS" {
                 self.output.push_str("<i>");
                 self.next_token();
-            } else if (self.current_token == "#ITALICS END"){
+            } else if self.current_token == "#ITALICS END" {
                 self.output.push_str("</i>");
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH SOUNDZ"){
+            } else if self.current_token == "#GIMMEH SOUNDZ" {
                 self.output.push_str("<audio controls> <source src=\"");
                 self.next_token();
-            } else if (self.current_token == "#AUDIO END"){
+            } else if self.current_token == "#AUDIO END" {
                 self.output.push_str("\"></audio>");
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH VIDZ"){
+            } else if self.current_token == "#GIMMEH VIDZ" {
                 self.output.push_str("<iframe src=\"");
                 self.next_token();
-            } else if (self.current_token == "#VIDEO END"){
+            } else if self.current_token == "#VIDEO END" {
                 self.output.push_str("\"/>");
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH NEWLINE"){
+            } else if self.current_token == "#GIMMEH NEWLINE" {
                 self.output.push_str("<br>");
                 self.next_token();
-            } else if (self.current_token == "#MAEK PARAGRAF"){
+            } else if self.current_token == "#MAEK PARAGRAF" {
                 self.output.push_str("<p>");
                 self.next_token();
                 paragraph_scope = true;
-            } else if (self.current_token == "#PARAGRAPH END"){
+            } else if self.current_token == "#PARAGRAPH END" {
                 self.output.push_str("</p>");
                 self.next_token();
                 paragraph_scope = false;
                 paragraph_var.clear();
-            } else if (self.current_token == "#MAEK LIST"){
+            } else if self.current_token == "#MAEK LIST" {
                 self.output.push_str("<ul>");
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH ITEM"){
+            } else if self.current_token == "#GIMMEH ITEM" {
                 self.output.push_str("<li>");
                 self.next_token();
-            } else if (self.current_token == "#LIST ITEM END"){
+            } else if self.current_token == "#LIST ITEM END" {
                 self.output.push_str("</li>");
                 self.next_token();
-            } else if (self.current_token == "#LIST END"){
+            } else if self.current_token == "#LIST END" {
                 self.output.push_str("</ul>");
                 self.next_token();
-            } else if (self.current_token == "#OBTW"){
+            } else if self.current_token == "#OBTW" {
                 self.output.push_str("<!--");
                 self.next_token();
-            } else if (self.current_token == "#TLDR"){
+            } else if self.current_token == "#TLDR" {
                 self.output.push_str("-->");
                 self.next_token();
-            } else if (self.current_token == "#MAEK HEAD"){
+            } else if self.current_token == "#MAEK HEAD" {
                 self.output.push_str("<head>");
                 self.next_token();
-            } else if (self.current_token == "#GIMMEH TITLE"){
+            } else if self.current_token == "#GIMMEH TITLE" {
                 self.output.push_str("<title>");
                 self.next_token();
-            } else if (self.current_token == "#TITLE END"){
+            } else if self.current_token == "#TITLE END" {
                 self.output.push_str("</title>");
                 self.next_token();
-            } else if (self.current_token == "#HEAD END"){
+            } else if self.current_token == "#HEAD END" {
                 self.output.push_str("</head>");
                 self.next_token();
-            } else if (self.current_token == "#I HAZ"){
+            } else if self.current_token == "#I HAZ" {
                 self.next_token();
                 var_name = self.current_token.clone();
                 self.next_token();
@@ -827,15 +827,15 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
                 var_value = self.current_token.clone();
                 self.next_token();
                 self.next_token();
-                if (paragraph_scope){
+                if paragraph_scope {
                     paragraph_var.insert(var_name.to_string(), var_value.to_string());
                 } else {
                     body_var.insert(var_name.to_string(), var_value.to_string());
                 }
-            } else if (self.current_token == "#LEMME SEE"){
+            } else if self.current_token == "#LEMME SEE" {
                 self.next_token();
                 let var_name = self.current_token.clone();
-                if(paragraph_scope){
+                if paragraph_scope {
                     if paragraph_var.contains_key(&var_name){
                         let final_var_value = paragraph_var.get(&var_name);
                         match final_var_value{
