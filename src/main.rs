@@ -20,6 +20,7 @@ fn current_token(&self) -> String;
 fn set_current_token(&mut self, tok: String);
 }
 
+//struct that basically runs everything, holds lexer and syntaxer (and technically semantic analysis too)
 pub struct LolcodeCompiler{
     lexer: LolcodeLexicalAnalyzer,
     current_token: String,
@@ -27,7 +28,7 @@ pub struct LolcodeCompiler{
 }
 
 impl LolcodeCompiler{
-
+    //prepares everything to run properly
     pub fn new() -> Self{
         Self {
             lexer: LolcodeLexicalAnalyzer::new(""),
@@ -39,12 +40,13 @@ impl LolcodeCompiler{
     }
 
 impl Compiler for LolcodeCompiler{
+    //method opens a new lexer, then it begins tokenization which runs the entire string through it and puts tokens into the tokens vector
     fn compile(&mut self, source: &str){
         self.lexer = LolcodeLexicalAnalyzer::new(source);
         self.lexer.tokenize();
         self.parse();
     }
-
+    //pops token off vector and returns whatever it is, also has error detection functionality which is somewhat redundant since its also built into the tokenizer method
     fn next_token(&mut self) -> String {
         let candidate = self.lexer.tokens.pop().unwrap_or_default();
         if self.lexer.lookup(&candidate) || !candidate.starts_with('#') {
@@ -58,7 +60,8 @@ impl Compiler for LolcodeCompiler{
             std::process::exit(1);
         }
     }
-
+    //basically just repeatedly calls next token to get tokens into the syntax analyzer, also completely disregards empty tokens to make syntax analysis go smoother
+    //is it an "interesting" use of the next token function, yes, does it work though, also yes
     fn parse(&mut self){
         while !self.lexer.tokens.is_empty() {
         let mut tok = self.next_token();
@@ -95,6 +98,7 @@ fn add_char(&mut self, c: char);
 fn lookup(&self, s: &str) -> bool;
 }
 
+//struct that stores everything related to the lexical analyzer, including the afformentioned tokens vector and all of the valid tokens in lolcode
 pub struct LolcodeLexicalAnalyzer{
     input: Vec<char>,
     position: usize,
@@ -150,6 +154,14 @@ impl LolcodeLexicalAnalyzer{
             variable_use : "#LEMME SEE".into(),
         }
     }
+    //this is by far the most complicated function in the entire project, so ill try to describe what its doing as well as possible
+    //in simple terms, it tracks if the current token is text or a tag and handles the tokens differently based on which it is
+    //if its text, no lookup is needed and it just throws it into the tokens vector
+    //if its a tag though, the tag is set to uppercase to make lookup easier, then theres functionality that basically allows the tokenizer to look ahead to see if the token is 2 words or not
+    //if the tag token is a valid one word token, cool, throws it into the vector
+    //if its not found to be a valid one word token, it then grabs the next word and performs lookup again
+    //if lookup comes back good, cool, throw it into the vector, if not, the program exits immediately since an invalid token was found
+    //TLDR, this method both tokenizes input and performs lexical analysis on the tokens in one fell swoop
     pub fn tokenize(&mut self) {
     let mut in_hash_token = false;
 
@@ -225,6 +237,7 @@ impl LolcodeLexicalAnalyzer{
 }
 
 impl LexicalAnalyzer for LolcodeLexicalAnalyzer{
+    //this and the add char method basically just grab the next character in the input, then adds the character to the current build
     fn get_char(&mut self) -> char{
         if self.position < self.input.len(){
             let c = self.input[self.position];
@@ -312,18 +325,22 @@ impl LolcodeSyntaxAnalyzer{
 
 impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
     
+    //this is the function that grabs the tokens from the parse method in lexical analysis, it then stores the tokens to a different token vector for usage in syntax analysis
     fn grab_token(&mut self, token: String){
         self.token_vector.push(token);
     }
-
+    //method to push tokens to the parse tree quickly (basically made it so that i didnt have to write out this line way more)
     fn parse_tree_push(&mut self){
         self.parse_tree.push(self.current_token.clone());
     }
-
+    //method that quickly grabs the next token from the token vector (once again made it so i didnt have to write out that line a bunch)
     fn next_token(&mut self){
         self.current_token = self.token_vector.pop().unwrap();
     }
-
+    //this function is basically the driver for syntax analysis, this is where it both starts and ends
+    //after everything is analyzed (assuming it makes it through and is found to be valid), the parse tree is sent to semantic analysis and it begins semantic analysis
+    //this method also grabs the output html from semantic analysis as well so that it was easier to access from main
+    //regarding the specifics of syntax analysis, most of it is pretty straightforward but i did write some commentary for the more interesting parts of it
     fn parse_lolcode(&mut self){
         self.token_vector.reverse();
         self.next_token();
@@ -351,6 +368,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.output = semantics.output.clone();
     }
     
+    //this is basically just an extended call of parse_title since its the only place where the title can appear
     fn parse_head(&mut self){
         if self.current_token == "#MAEK HEAD" {
             self.parse_tree_push();
@@ -391,6 +409,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             std::process::exit(1);
         }
     }
+    //since comments can be repeated over and over again before the body, the method calls itself upon completion, but if #OBTW isnt found again, it just returns anyways
     fn parse_comment(&mut self){
         if self.current_token == "#OBTW" {
             self.parse_tree_push();
@@ -414,7 +433,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             return;
         }
     }
-
+    //basically just keeps looking for tokens until #KTHXBYE is found since its always the last token in the body
     fn parse_body(&mut self){
         if self.current_token == "#KTHXBYE" {
             return
@@ -476,6 +495,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
             self.parse_inner_text();
         }
     }
+    //basically the same logic as the body parsing
     fn parse_inner_text(&mut self){
         if !self.current_token.starts_with("#") {
             self.parse_text();
@@ -506,6 +526,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
                 std::process::exit(1);
         }
     }
+    //relatively simple method besides when it checks to see if the variable name is valid, it basically checks to see if theres any spaces in it, and if there is, gives an error
     fn parse_variable_define(&mut self){
         if self.current_token == "#I HAZ" {
             self.parse_tree_push();
@@ -613,6 +634,7 @@ impl SyntaxAnalyzer for LolcodeSyntaxAnalyzer{
         self.parse_list_items();
         return;
     }
+    //similar setup to parse_comments, basically just keeps calling itself until #OIC is found, it then returns
     fn parse_list_items(&mut self){
         if self.current_token == "#OIC" {
             self.parse_tree.push("#LIST END".to_string());
@@ -733,6 +755,12 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     fn push_output(&mut self){
         self.output.push_str(&self.current_token);
     }
+    //basically just a very lengthy while loop, if a specific token is encountered, it outputs the corresponding html
+    //the main meat of the semantic analysis is the static scoped variables, which i handled using 2 hashmaps, one for the body scope and one for the paragraph scope
+    //when a variable is declared, the corresponding information is added to either the body or paragraph hashmap depending on which one the program is currently in (tracked w/ paragraph_scope bool)
+    //when a paragraph ends, the paragraph hashmap is completely cleared out since that information will never be accessed again and will probably be replaced anyways
+    //when a variable is called, if its in the body, it checks the body hashmap for the variable, if its there, cool, outputs its value, if not, gives an error and exits
+    //if a variable is called in a paragraph, it checks the paragraph hashmap first, if its there, cool, outputs the value, if not, it checks the body one, if its there, cool, outputs the value, if not, gives an error and exits
     fn semantic_analysis(&mut self){
         self.parse_tree.reverse();
         let mut body_var: HashMap<String, String> = HashMap::new();
@@ -838,6 +866,7 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
                         let final_var_value = paragraph_var.get(&var_name);
                         match final_var_value{
                             Some(value) => self.output.push_str(value),
+                            //i wrote this line like this since it literally should never output, and thankfully it never has
                             None =>println!("whoops, this shouldnt output"),
                         }
                     }  else if body_var.contains_key(&var_name){
@@ -870,7 +899,11 @@ impl SemanticAnalyzer for LolcodeSemanticAnalyzer{
     }
 //--------------------main--------------------
 
-fn main() {
+//the actual main driver behind everything
+//first pulls text from .lol file, then runs compiler w/ pulled text
+//eventually grabs outputted html from semantic analysis
+//then writes content to corresponding html file and automatically opens chrome w/ the newly created html file
+fn main(){
     let args: Vec<String> = env::args().collect();
     if args.len() < 2{
         eprintln!("usage: {} <input_file>", args[0]);
@@ -881,6 +914,14 @@ fn main() {
         eprintln!("error reading file '{}': {}", filename, err);
         std::process::exit(1);
     });
+    if !filename.to_lowercase().ends_with(".lol") {
+        eprintln!("user error: the input file must have a .lol extension");
+        std::process::exit(1);
+    }
+    if lolspeak_string.is_empty(){
+        eprintln!("user error: the input file is empty");
+        std::process::exit(1);
+    }
     let mut compiler = LolcodeCompiler::new();
     compiler.compile(&lolspeak_string);
     let raw_filename = filename.split('.').next().unwrap_or(filename);
