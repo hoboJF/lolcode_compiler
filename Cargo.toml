@@ -1,5 +1,5 @@
 [package]
-name = "lolspeak_compiler"
+name = "lolcode_compiler"
 version = "0.1.0"
 edition = "2024"
 
